@@ -1,7 +1,6 @@
-/* global module */
-/* jshint esnext: true */
+/* global module, Promise */
 
-//FIXME, no promise in IE 8 and above.
+
 
 var convertReponse = function(contentType,response) {
     var actualContentType =  ( contentType.split(";")[0] || "" ).toUpperCase();
@@ -14,16 +13,15 @@ var convertReponse = function(contentType,response) {
 
 };
 
+var ajaxii = {};
+
 var ajaxiiCall = function(method,url, contentType, data ) {
 
     return new Promise(function(resolve,reject) {
         var request = new XMLHttpRequest();
 
-        if ( contentType ) {
-            request.setRequestHeader('Content-Type', contentType);
 
-        }
-
+        //data, textStatus, jqXHR ) {}, function( jqXHR, textStatus, errorThrown
         request.onload = function () {
 
             var resData = null;
@@ -33,19 +31,20 @@ var ajaxiiCall = function(method,url, contentType, data ) {
                 resData = convertReponse(contentType,this.response);
             }
 
-            if ( this.status === 200  ) {
-                resolve({ status: this.status, res: resData}) ;
-            } else {
-                reject( {status: this.status , res: this.response});
-            }
+            resolve.apply(null,[resData,this.status,this]) ;
+
         };
 
         request.onerror = function (err) {
-            reject(err);
+            reject.apply(null,[this,this.status,err]);
         };
 
         //open
         request.open(method, url, true);
+
+        if ( contentType ) {
+            request.setRequestHeader('Content-Type', contentType);
+        }
 
         if (data) {
             request.send(JSON.stringify(data));
@@ -57,11 +56,12 @@ var ajaxiiCall = function(method,url, contentType, data ) {
 };
 
 
-var ajaxii = {};
+
 
 ajaxii.post = function(url,data) {
     //FIXME not yet fully tested and we need to support form etc
     if ( data ) {
+        console.log('data');
         return ajaxiiCall('POST',url,'application/json; charset=utf-8',data);
     } else {
         return ajaxiiCall('POST',url);
@@ -76,8 +76,8 @@ ajaxii.delete = function(url) {
     return ajaxiiCall('DELETE',url);
 };
 
-ajaxii.put = function(url,contentType,data) {
-    return ajaxiiCall('PUT',url,contentType,data);
+ajaxii.put = function(url,data) {
+    return ajaxiiCall('PUT',url,'application/json; charset=utf-8',data);
 };
 
 module.exports = ajaxii;
