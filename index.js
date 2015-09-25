@@ -68,8 +68,12 @@ ajaxii.post = function(url,data) {
     }
 
 };
-ajaxii.get = function(url) {
-    return ajaxiiCall('GET',url);
+ajaxii.get = function(url,bust) {
+    var realUrl = url;
+    if ( bust === true ) {
+        realUrl = realUrl + "?bust=" + (new Date().getTime());
+    }
+    return ajaxiiCall('GET',realUrl);
 };
 
 ajaxii.delete = function(url) {
