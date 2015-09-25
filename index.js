@@ -61,7 +61,6 @@ var ajaxiiCall = function(method,url, contentType, data ) {
 ajaxii.post = function(url,data) {
     //FIXME not yet fully tested and we need to support form etc
     if ( data ) {
-        console.log('data');
         return ajaxiiCall('POST',url,'application/json; charset=utf-8',data);
     } else {
         return ajaxiiCall('POST',url);
@@ -71,7 +70,8 @@ ajaxii.post = function(url,data) {
 ajaxii.get = function(url,bust) {
     var realUrl = url;
     if ( bust === true ) {
-        realUrl = realUrl + "?bust=" + (new Date().getTime());
+        var containsParams = url.indexOf("?") > -1;
+        realUrl = realUrl +  (containsParams ? "&" : "?") + "bust=" + (new Date().getTime());
     }
     return ajaxiiCall('GET',realUrl);
 };
